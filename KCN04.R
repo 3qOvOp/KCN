@@ -41,11 +41,12 @@ addBBands(n=20,sd=2,draw = 'bands')
 prices.df <- cbind(PFE$PFE.Close,JNJ$JNJ.Close,MRK$MRK.Close,
                    BSX$BSX.Close,DVA$DVA.Close,VTRS$VTRS.Close,AMD$AMD.Close)
 prices.df <- as.data.frame(prices.df)
-#norm.values <- preProcess(prices.df, method=c("center", "scale"))
-#prices.df <- predict(norm.values, prices.df)
+
 library(PerformanceAnalytics)
 prices.df <- Return.calculate(prices.df, method="log")
 prices.df <- prices.df[-1,]
+norm.values <- preProcess(prices.df, method=c("center", "scale"))
+prices.df <- predict(norm.values, prices.df)
 #rollmean(prices.df[,2:4],5)
 
 ## simple heatmap of correlations (without values)
@@ -95,8 +96,8 @@ min_classification <- min_classification$`classification$assignment`
 init_class <- melted.cor.mat[which(melted.cor.mat$`classification$assignment`== min_classification),]
 init_stock <- c(init_class$X1,init_class$X2)
 init_stock <- unique(init_stock)
-# [1] MRK.Close  DVA.Close  AMD.Close  VTRS.Close JNJ.Close  BSX.Close 
-# 7 Levels: PFE.Close JNJ.Close MRK.Close BSX.Close DVA.Close ... AMD.Close
+#[1] BSX.Close AMD.Close MRK.Close
+#Levels: PFE.Close JNJ.Close MRK.Close BSX.Close DVA.Close VTRS.Close AMD.Close
 
 # 每个初始化的股票都和另外某个股票具有非常低的相关性，但这些股票之间可能具有较高的相关性
 # Each initialized stock has a very low correlation with another stock, but these stocks may have a high correlation
@@ -175,11 +176,10 @@ KCN <- function(prices.df, init_stock){
   return(init_stock.df)
 }
 cls <- KCN(prices.df,init_stock)
-# X1        X2         X3        X4
-# 1 MRK.Close AMD.Close VTRS.Close BSX.Close
-# 2      <NA> PFE.Close       <NA>      <NA>
-# 3      <NA> JNJ.Close       <NA>      <NA>
-# 4      <NA> DVA.Close       <NA>      <NA>
+#      X1        X2        X3
+#1  BSX.Close AMD.Close MRK.Close
+#2  DVA.Close      <NA> PFE.Close
+#3 VTRS.Close      <NA> JNJ.Close
 
 # std of classication for KCN
 KCN_test <- function(prices.df,cls){
@@ -206,9 +206,13 @@ KCN_test <- function(prices.df,cls){
   return(result)
 }
 KCN_test(prices.df,cls)
-# [1] "0.658869846703084" 
-#"MRK.Close"         "PFE.Close"         "VTRS.Close"       "BSX.Close"      
-
+#      std
+# "0.636289111065964" "DVA.Close"         "AMD.Close"         "PFE.Close"   
+# "0.650167068347534" "VTRS.Close"        "AMD.Close"         "PFE.Close" 
+# "0.636289111065964" "DVA.Close"         "AMD.Close"         "PFE.Close" 
+# "0.629203939692861" "DVA.Close"         "AMD.Close"         "MRK.Close"  
+# "0.657137856622789" "DVA.Close"         "AMD.Close"         "JNJ.Close" 
+# "0.636289111065964" "DVA.Close"         "AMD.Close"         "PFE.Close"  
 # std of classication at random
 k <- length(init_stock)
 Rand_risk <- function(prices.df,k,ilter=1000){
@@ -226,7 +230,7 @@ Rand_risk <- function(prices.df,k,ilter=1000){
   return(mean_std)
 }
 Rand_risk(prices.df,k,ilter)
-# 0.6959148
+# 0.6762008
 
 
 
