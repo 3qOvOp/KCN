@@ -21,7 +21,10 @@ set.seed(19)
 
 ## Trend Analysis - green means up bar and the red means down bar
 #PFE (Pfizer) trend
-getSymbols(c("AMD","PFE","JNJ","MRK","BSX","DVA","VTRS"),from = '2021-01-01', to ='2022-5-20')
+getSymbols(c("AMD","PFE","JNJ","MRK","BSX","DVA","VTRS",
+             "NVDA","ASML","MSFT","TSM","AVGO","ADBE","ORCL",
+             "CSCO","ACN","INTC","TXN","CRM","IBM"),
+           from = '2021-05-25', to ='2022-5-25')
 chartSeries(PFE,subset='2020-01-01::2021-10-31',up.col='green',dn.col='red',theme="white")
 #JNJ (Johnson & Johnson) trend
 chartSeries(JNJ,subset='2020-01-01::2021-10-31',up.col='green',dn.col='red',theme="white")
@@ -39,7 +42,11 @@ addBBands(n=20,sd=2,draw = 'bands')
 
 ## data preprocessing
 prices.df <- cbind(PFE$PFE.Close,JNJ$JNJ.Close,MRK$MRK.Close,
-                   BSX$BSX.Close,DVA$DVA.Close,VTRS$VTRS.Close,AMD$AMD.Close)
+                   BSX$BSX.Close,DVA$DVA.Close,VTRS$VTRS.Close,AMD$AMD.Close,
+                   NVDA$NVDA.Close,ASML$ASML.Close,MSFT$MSFT.Close,TSM$TSM.Close,
+                   AVGO$AVGO.Close,ADBE$ADBE.Close,ORCL$ORCL.Close,CSCO$CSCO.Close,
+                   ACN$ACN.Close,INTC$INTC.Close,TXN$TXN.Close,CRM$CRM.Close,IBM$IBM.Close
+)
 prices.df <- as.data.frame(prices.df)
 
 library(PerformanceAnalytics)
@@ -99,6 +106,11 @@ init_stock <- unique(init_stock)
 #[1] BSX.Close AMD.Close MRK.Close
 #Levels: PFE.Close JNJ.Close MRK.Close BSX.Close DVA.Close VTRS.Close AMD.Close
 
+init_stock
+
+
+
+
 # 每个初始化的股票都和另外某个股票具有非常低的相关性，但这些股票之间可能具有较高的相关性
 # Each initialized stock has a very low correlation with another stock, but these stocks may have a high correlation
 # 合并相关性高的初始化类：找出平均相关系数最大的类，在初始化股票中合并非常相关的类为同一类
@@ -108,13 +120,12 @@ max_classification <- melted.cor.mat[which.max(melted.cor.mat$value),]
 max_classification <- max_classification$`classification$assignment`
 merge_stocks <-  melted.cor.mat[which(melted.cor.mat$`classification$assignment`== max_classification),]
 merge_stocks <- merge_stocks[order(merge_stocks$value, decreasing = TRUE),]
-
+init_marks <- matrix(0,nrow=1,ncol=length(init_stock))
 # 去除非常相关的初始化类
 # get rid of very relevant initial classification
+q <- 0
 for (i in 1:dim(merge_stocks)[1]) {
-  if(i > length(merge_stocks)){
-    break
-  }
+  
   #print(init_stock[which(init_stock == merge_stocks[i,1])])
   p1 <- which(init_stock == merge_stocks[i,1])
   p2 <- which(init_stock == merge_stocks[i,2])
@@ -122,10 +133,25 @@ for (i in 1:dim(merge_stocks)[1]) {
   #print(p2)
   if(length(p1)>0 & length(p2)>0){
     if(p1 > 0 & p2 > 0){
-      init_stock <- init_stock[-p2]
+      print(i)
+      if(init_marks[p1] > 0 | init_marks[p2] > 0 ){
+        tem_max <- max(init_marks[p2],init_marks[p1])
+        
+        init_marks[p2] <- tem_max
+        init_marks[p1] <- tem_max
+      }else{
+        init_marks[p2] <- q
+        init_marks[p1] <- q
+        q <- q + 1
+      }
     }
   }
 }
+#init_marks
+for (r in 1:max(init_marks)) {
+  init_marks[which(init_marks==r)[1]]<-0
+}
+init_stock <- init_stock[which(init_marks == 0)]
 #[1] MRK.Close  AMD.Close  VTRS.Close BSX.Close 
 #Levels: PFE.Close JNJ.Close MRK.Close BSX.Close DVA.Close VTRS.Close AMD.Close
 
@@ -176,10 +202,18 @@ KCN <- function(prices.df, init_stock){
   return(init_stock.df)
 }
 cls <- KCN(prices.df,init_stock)
-#      X1        X2        X3
-#1  BSX.Close AMD.Close MRK.Close
-#2  DVA.Close      <NA> PFE.Close
-#3 VTRS.Close      <NA> JNJ.Close
+#          X1         X2         X3        X4        X5        X6        X7         X8
+#   1  BSX.Close  AMD.Close INTC.Close IBM.Close PFE.Close JNJ.Close MRK.Close VTRS.Close
+#   2  DVA.Close NVDA.Close  TXN.Close      <NA>      <NA>      <NA>      <NA>       <NA>
+#   3       <NA> ASML.Close       <NA>      <NA>      <NA>      <NA>      <NA>       <NA>
+#   4       <NA> MSFT.Close       <NA>      <NA>      <NA>      <NA>      <NA>       <NA>
+#   5       <NA>  TSM.Close       <NA>      <NA>      <NA>      <NA>      <NA>       <NA>
+#   6       <NA> AVGO.Close       <NA>      <NA>      <NA>      <NA>      <NA>       <NA>
+#   7       <NA> ADBE.Close       <NA>      <NA>      <NA>      <NA>      <NA>       <NA>
+#   8       <NA> ORCL.Close       <NA>      <NA>      <NA>      <NA>      <NA>       <NA>
+#   9       <NA> CSCO.Close       <NA>      <NA>      <NA>      <NA>      <NA>       <NA>
+#   10      <NA>  ACN.Close       <NA>      <NA>      <NA>      <NA>      <NA>       <NA>
+#   11      <NA>  CRM.Close       <NA>      <NA>      <NA>      <NA>      <NA>       <NA>
 
 # std of classication for KCN
 KCN_test <- function(prices.df,cls){
@@ -207,12 +241,14 @@ KCN_test <- function(prices.df,cls){
 }
 KCN_test(prices.df,cls)
 #      std
-# "0.636289111065964" "DVA.Close"         "AMD.Close"         "PFE.Close"   
-# "0.650167068347534" "VTRS.Close"        "AMD.Close"         "PFE.Close" 
-# "0.636289111065964" "DVA.Close"         "AMD.Close"         "PFE.Close" 
-# "0.629203939692861" "DVA.Close"         "AMD.Close"         "MRK.Close"  
-# "0.657137856622789" "DVA.Close"         "AMD.Close"         "JNJ.Close" 
-# "0.636289111065964" "DVA.Close"         "AMD.Close"         "PFE.Close"  
+# [1] "0.575861492349141" "BSX.Close"         "ACN.Close"         "INTC.Close"        "IBM.Close"         "PFE.Close"        
+# [7] "JNJ.Close"         "MRK.Close"         "VTRS.Close" 
+# [1] "0.55555033848641" "BSX.Close"        "TSM.Close"        "TXN.Close"        "IBM.Close"        "PFE.Close"        "JNJ.Close"       
+# [8] "MRK.Close"        "VTRS.Close" 
+# [1] "0.55695719161355" "BSX.Close"        "MSFT.Close"       "INTC.Close"       "IBM.Close"        "PFE.Close"        "JNJ.Close"       
+# [8] "MRK.Close"        "VTRS.Close"  
+# [1] "0.551831642757956" "DVA.Close"         "TSM.Close"         "TXN.Close"         "IBM.Close"         "PFE.Close"        
+# [7] "JNJ.Close"         "MRK.Close"         "VTRS.Close" 
 # std of classication at random
 k <- length(init_stock)
 Rand_risk <- function(prices.df,k,ilter=1000){
@@ -230,7 +266,7 @@ Rand_risk <- function(prices.df,k,ilter=1000){
   return(mean_std)
 }
 Rand_risk(prices.df,k,ilter)
-# 0.6762008
+# [1] 0.6495747
 
 
 
