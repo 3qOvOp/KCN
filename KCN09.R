@@ -69,15 +69,21 @@ for (i in 1:dim(prices.df)[2]) {
 #rollmean(prices.df[,2:4],5)
 
 ## simple heatmap of correlations (without values)
-#heatmap(cor(prices.df), Rowv = NULL, Colv = NULL)
+#heatmap(cor(prices.df), Rowv = 20, Colv = 20)
 #heatmap(cor(prices.df))
 ## heatmap with values
 #install.packages('gplots')
+strsplit(colnames(prices.df)[1],split='\\.')[[1]][1]
+prices.df_pic <- prices.df
+for(i in 1:dim(prices.df_pic)[2] ){
+  
+  colnames(prices.df_pic)[i] <- strsplit(colnames(prices.df_pic)[i],split='\\.')[[1]][1]
+}
 library(gplots)
-heatmap.2(cor(prices.df), Rowv = FALSE, Colv = FALSE, dendrogram = "none",
+heatmap.2(cor(prices.df_pic), Rowv = FALSE, Colv = FALSE, dendrogram = "none",
           cellnote = round(cor(prices.df),2),
           notecol = "black", key = FALSE, trace = 'none',cexRow = 1,cexCol = 1)
-
+prices.df <- prices.df_pic
 ## auto-initial algerithm
 # get rid of repetitive coefficiency
 library(reshape) # to generate input for the plot
@@ -205,7 +211,16 @@ while (k>10) {
 }
 init_stock_tem
 init_stock <- init_stock_tem
-
+melted.cor.mat_reorder <- melted.cor.mat[order(melted.cor.mat$value,decreasing = TRUE),]
+l <- dim(melted.cor.mat_reorder)[1]
+stocks_tem <- c()
+for (i in 1:l) {
+  stocks_tem[2*i-1] <- melted.cor.mat_reorder[i,1]
+  stocks_tem[2*i] <- melted.cor.mat_reorder[i,2]
+}
+stocks_tem <- unique(stocks_tem)
+prices.df_tem <- prices.df[,stocks_tem]
+prices.df_tem[1]
 # 每个初始化的股票都和另外某个股票具有非常低的相关性，但这些股票之间可能具有较高的相关???
 # Each initialized stock has a very low correlation with another stock, but these stocks may have a high correlation
 # 合并相关性高的初始化类：找出平均相关系数最大的类，在初始化股票中合并非常相关的类为同一???
@@ -216,7 +231,7 @@ init_stock <- init_stock_tem
 # window_size is 3 5 7 ...
 Ma_std <- function(ts,window_size=21){
   margin <- (window_size-1)/2
-  l <- length(prices.df$PFE.Close)
+  l <- length(ts)
   ma <- rollmean(ts,window_size)
   ts <- ts[-c(1:margin,l-margin+1:l)]
   tem <- (ts - ma)^2
@@ -259,9 +274,9 @@ KCN <- function(prices.df, init_stock){
   }
   return(init_stock.df)
 }
-cls <- KCN(prices.df,init_stock)
+cls <- KCN(prices.df_tem,init_stock)
 #          X1        X2         X3         X4        X5         X6        X7        X8         X9       X10
-# 1 NVDA.Close IBM.Close MSFT.Close AVGO.Close TSM.Close CSCO.Close JNJ.Close DVA.Close VTRS.Close BSX.Close
+# 1 NVDA.Close IBM.Close MSFT.Close AVGO.Close TSM.Close CSCO.Calose JNJ.Close DVA.Close VTRS.Close BSX.Close
 # 2  AMD.Close      <NA> ADBE.Close INTC.Close      <NA> ORCL.Close PFE.Close      <NA>       <NA>      <NA>
 # 3 ASML.Close      <NA>  ACN.Close  TXN.Close      <NA>       <NA> MRK.Close      <NA>       <NA>      <NA>
 # 4  CRM.Close      <NA>       <NA>       <NA>      <NA>       <NA>      <NA>      <NA>       <NA>      <NA>
@@ -304,10 +319,16 @@ Mean_KCN_test <- function(k,n){
   m <- s / 1000
   return(m)
 }
-Mean_KCN_test(8,1000)
-# 6  0.007026115
-# 8  0.006044715
-# 10 0.005421609
+Mean_KCN_test(10,1000)
+# 2  0.01203829
+# 3  0.00979374
+# 4  0.00856183
+# 5  0.007571107
+# 6  0.00702611
+# 7  0.00646038
+# 8  0.00604471
+# 9  0.00570155
+# 10 0.00542160
 # std of classication at random
 k <- length(init_stock)
 Rand_risk <- function(prices.df,k,ilter=1000){
@@ -324,11 +345,16 @@ Rand_risk <- function(prices.df,k,ilter=1000){
   mean_std <- sum_std / ilter
   return(mean_std)
 }
-Rand_risk(prices.df,8,ilter)
+Rand_risk(prices.df,6,ilter)
+# 2  0.01196652
+# 3  0.01000668
+# 4  0.00876331
+# 5  0.007892457
 # 6  0.00723697
-# 8  0.006400692
-# 10 0.005800091
-
+# 7  0.00680076
+# 8  0.00640069
+# 9  0.00609278
+# 10 0.00580009
 
 
 
@@ -340,10 +366,11 @@ Rand_risk(prices.df,8,ilter)
 #          cellnote = round(cor(initlist1.df),2),
 #          notecol = "black", key = FALSE, trace = 'none',
 #          ,cexRow = 1,cexCol = 1)
-d <- data.frame(k = c(8,7,6,5,4,3,2),
-                kcn = c(0.5547681,	0.5674674,	0.5839961,	0.6068281,	0.6372221,	0.6870839,	0.776066),
-                random = c(0.6495747,	0.6581879,	0.6703589,	0.6837369,	0.7092243,	0.7476468,	0.8194957),
-                diff = c(0.094807,	0.090721,	0.086363,	0.076909,	0.072002,	0.060563,	0.04343),
-                diff_per = c(0.145952,	0.137834,	0.128831,	0.112483,	0.101522,	0.081005,	0.052996))
+d <- data.frame(k = c(10,9,8,7,6,5,4,3,2),
+                kcn = c(0.00542160,0.00570155,0.00604471,0.00646038,0.00702611,0.00759972,0.00856183,0.00979374,0.01203829),
+                random = c(0.00580009,0.00609278,0.00640069,0.00680076,0.00723697,0.00795139,0.00876331,0.01000668,0.01196652),
+                diff_per = c(0.065255884,0.064212067,0.055615879,0.050050288,0.029136503,0.040716091,0.022991313,0.021279785,-0.005997567)
+                )
+
 ggplot(data = d, aes(x = k, y = diff_per)) +
   geom_line()
