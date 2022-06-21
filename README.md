@@ -99,6 +99,8 @@ Performance
 
 ####################################################################################################
 
+ ![image](https://github.com/3qOvOp/KCN/blob/main/classification.png)
+
 As can be clearly seen in Figure 4.5.2 below, as the number of stocks selected, the greater the risk reduction ratio of KCN, KCN can reduce the risk reduction effect by up to about 6.5%. When k = 2, KCN has almost no household effect. It is easy to find from the figure that the slope of the line is getting smaller and smaller and has an upward trend, indicating that the effect of the model has an upper limit, and the upper limit will be close to 6.5%. Because when k=10, the slope of the line is 6.53%-6.42%=0.11%, it is estimated that if k=11, the risk reduction effect will not be greater than 6.53%*(1+0.11)=7.24%. There is a special point in the figure, when k=6, the risk reduction effect becomes worse. So for investors who don't have much time and energy, the algorithm recommends them to pick 5 stocks. For yield-conscious investors, 7 to 9 stocks are their best bet for balancing risk-reward.
 
  ![image](https://github.com/3qOvOp/KCN/blob/main/performance.png)
