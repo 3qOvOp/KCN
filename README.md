@@ -85,4 +85,14 @@ Figure 3.5.3 Classification result
 This innovative idea has many benefits. First, it does not require manual labeling of data, so it is suitable for classification of a large number of stocks. Several extreme stocks can be automatically marked. Second, it solves the classification problem by applying correlation without the need for spatial coordinates. The last point is that the algorithm does not need to be trained, so it is extremely efficient, which is very important in short-term trading of stocks.
 
 
+Performance
+As can be clearly seen in Figure 4.5.2 below, as the number of stocks selected, the greater the risk reduction ratio of KCN, KCN can reduce the risk reduction effect by up to about 6.5%. When k = 2, KCN has almost no household effect. It is easy to find from the figure that the slope of the line is getting smaller and smaller and has an upward trend, indicating that the effect of the model has an upper limit, and the upper limit will be close to 6.5%. Because when k=10, the slope of the line is 6.53%-6.42%=0.11%, it is estimated that if k=11, the risk reduction effect will not be greater than 6.53%*(1+0.11)=7.24%. There is a special point in the figure, when k=6, the risk reduction effect becomes worse. So for investors who don't have much time and energy, the algorithm recommends them to pick 5 stocks. For yield-conscious investors, 7 to 9 stocks are their best bet for balancing risk-reward.
+ ![image](https://github.com/3qOvOp/KCN/blob/main/performance.png)
+ 
+Risk distribution for k=7 stocks
+Then we continue to explore the case when k is equal to 7, the standard deviation of KCN distribution is 0.006, and the standard deviation of random portfolio investment is 0.0012, which is about twice that of KCN. Obviously, the effect of KCN investment strategy at this time is between K=5 and 10. It has both tail docking and concentration effects. Not only that, we can find from Figure 4.5.5 that the concentration effect of KCN is not excessive, because the left sides of the two distributions are almost coincident. This means that KCN's portfolio investment strategy does not filter out extremely low-risk portfolios. Therefore, when k=7, KCN's portfolio performs the best overall.
+ ![image](https://github.com/3qOvOp/KCN/blob/main/distribution.png)
+
+
+
 
