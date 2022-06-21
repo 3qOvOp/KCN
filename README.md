@@ -71,6 +71,7 @@ Algorithm 2. Classification for all stocks using K-correlated neighbours
 
 Scheme abstraction
 
+
 The stock market has many stocks, which are scattered in a certain dimension of space like nodes. These stocks have more or less some correlation, and this close correlation is like distance. The greater the correlation, the closer the two stocks are in space. It is difficult for investors to categorize all stocks by correlation. This paper considers the correlation between stocks as distance, so that the abstract stock market comes to life. There are many algorithms that study classification in traditional machine learning, so classifying stocks becomes simple. But there are still some differences. Traditional classification methods need to know the spatial vector of each data point to perform classification or clustering. For stock market data, we can only know the relative position of each stock. Therefore, it is necessary to mark several underlying stocks first. The role of these stocks is to determine the node space, that is to say, all other stocks can find their relative positions. The detailed process follows.
 The stock has been simulated as the node in Figure 3.1 below, and the line is the correlation between the two stocks. The gray lines are randomly presented, while the red lines show very small correlations. In theory there is a line between any two stocks. Thus, with the help of the red lines, we can easily spot the five extreme stocks. However, we found that there are two stocks that are very close to each other, which have been connected by a blue line on the right in the image below. The votes of the five stocks that are very close should be in the same class, so keep one of these stocks of the same class.
  ![image](https://github.com/3qOvOp/KCN/blob/main/351.png)
@@ -86,11 +87,16 @@ This innovative idea has many benefits. First, it does not require manual labeli
 
 
 Performance
+
 As can be clearly seen in Figure 4.5.2 below, as the number of stocks selected, the greater the risk reduction ratio of KCN, KCN can reduce the risk reduction effect by up to about 6.5%. When k = 2, KCN has almost no household effect. It is easy to find from the figure that the slope of the line is getting smaller and smaller and has an upward trend, indicating that the effect of the model has an upper limit, and the upper limit will be close to 6.5%. Because when k=10, the slope of the line is 6.53%-6.42%=0.11%, it is estimated that if k=11, the risk reduction effect will not be greater than 6.53%*(1+0.11)=7.24%. There is a special point in the figure, when k=6, the risk reduction effect becomes worse. So for investors who don't have much time and energy, the algorithm recommends them to pick 5 stocks. For yield-conscious investors, 7 to 9 stocks are their best bet for balancing risk-reward.
+
  ![image](https://github.com/3qOvOp/KCN/blob/main/performance.png)
  
+ 
 Risk distribution for k=7 stocks
+
 Then we continue to explore the case when k is equal to 7, the standard deviation of KCN distribution is 0.006, and the standard deviation of random portfolio investment is 0.0012, which is about twice that of KCN. Obviously, the effect of KCN investment strategy at this time is between K=5 and 10. It has both tail docking and concentration effects. Not only that, we can find from Figure 4.5.5 that the concentration effect of KCN is not excessive, because the left sides of the two distributions are almost coincident. This means that KCN's portfolio investment strategy does not filter out extremely low-risk portfolios. Therefore, when k=7, KCN's portfolio performs the best overall.
+
  ![image](https://github.com/3qOvOp/KCN/blob/main/distribution.png)
 
 
